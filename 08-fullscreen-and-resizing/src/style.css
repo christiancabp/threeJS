@@ -1,0 +1,17 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html,       /*this is for not being able to scroll past the page */
+body {
+  overflow: hidden;
+}
+
+/* Fit to page */
+.webgl {
+  position: fixed; /* or absolute */
+  top: 0;
+  left: 0;
+  outline: none;
+}
