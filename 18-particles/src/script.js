@@ -33,27 +33,27 @@ const particlesGeometry = new THREE.BufferGeometry();
 const count = 20000;
 //position attribute
 const position = new Float32Array(count * 3); //3 vertices x, y, z
-const colors = new Float32Array(count * 3);
+// const colors = new Float32Array(count * 3);
 
 for (let i = 0; i < count * 3; i++) {
   // Random vertices
   position[i] = (Math.random() - 0.5) * 10; // Math.random() = 0 to 1
   // Random colors
-  colors[i] = Math.random();
+  // colors[i] = Math.random();
 }
 particlesGeometry.setAttribute(
   "position",
   new THREE.BufferAttribute(position, 3)
 );
-particlesGeometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+// particlesGeometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 // Material
 const particlesMaterial = new THREE.PointsMaterial({
   size: 0.1,
   sizeAttenuation: true, // camera is far away from the particle
 });
 
-particlesMaterial.vertexColors = true;
-// particlesMaterial.color = new THREE.Color("#ff88cc");
+// particlesMaterial.vertexColors = true;
+particlesMaterial.color = new THREE.Color("#ff88cc");
 particlesMaterial.transparent = true;
 particlesMaterial.alphaMap = particleTexture; //We have a problem
 //Optimization

@@ -9,7 +9,7 @@ import gsap from "gsap"; //npm i gsap@3.5.1
 const gui = new dat.GUI();
 
 const parameters = {
-  materialColor: "#ffeded",
+  materialColor: "#5162db",
 };
 
 gui.addColor(parameters, "materialColor").onChange(() => {
@@ -115,6 +115,11 @@ scene.add(particles);
 const directionalLight = new THREE.DirectionalLight("#ffffff");
 directionalLight.position.set(1, 1, 0);
 scene.add(directionalLight);
+
+gui.add(directionalLight, "intensity").min(0).max(2).step(0.001);
+gui.add(directionalLight.position, "x").min(-5).max(5).step(0.001);
+gui.add(directionalLight.position, "y").min(-5).max(5).step(0.001);
+gui.add(directionalLight.position, "z").min(-5).max(5).step(0.001);
 
 /**
  * Sizes

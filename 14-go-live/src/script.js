@@ -22,6 +22,7 @@ const scene = new THREE.Scene();
  */
 const textureLoader = new THREE.TextureLoader();
 const matcapTexture = textureLoader.load("textures/matcaps/8.png");
+const particleTexture = textureLoader.load("textures/matcaps/2.png");
 
 /**
  * Fonts
@@ -33,7 +34,7 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
   const material = new THREE.MeshMatcapMaterial({ matcap: matcapTexture });
 
   // Text
-  const textGeometry = new TextGeometry("Hi I'm Chris", {
+  const textGeometry = new TextGeometry("WELCOME", {
     font: font,
     size: 0.5,
     height: 0.2,
@@ -48,23 +49,61 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
 
   const text = new THREE.Mesh(textGeometry, material);
   scene.add(text);
-
-  // Donuts
-  const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 32, 64);
-
-  for (let i = 0; i < 100; i++) {
-    const donut = new THREE.Mesh(donutGeometry, material);
-    donut.position.x = (Math.random() - 0.5) * 10;
-    donut.position.y = (Math.random() - 0.5) * 10;
-    donut.position.z = (Math.random() - 0.5) * 10;
-    donut.rotation.x = Math.random() * Math.PI;
-    donut.rotation.y = Math.random() * Math.PI;
-    const scale = Math.random();
-    donut.scale.set(scale, scale, scale);
-
-    scene.add(donut);
-  }
 });
+
+/**
+ * PARTICLES
+ */
+
+const particlesGeometry = new THREE.BufferGeometry();
+const count = 40000;
+//position attribute
+const position = new Float32Array(count * 3); //3 vertices x, y, z
+
+for (let i = 0; i < count * 3; i++) {
+  // Random vertices
+  position[i] = (Math.random() - 0.5) * 25; // Math.random() = 0 to 1
+}
+
+// Geometry
+particlesGeometry.setAttribute(
+  "position",
+  new THREE.BufferAttribute(position, 3)
+);
+
+// Material
+const particlesMaterial = new THREE.PointsMaterial({
+  size: 0.1,
+  sizeAttenuation: true, // camera is far away from the particle
+});
+
+particlesMaterial.color = new THREE.Color("#ffffff");
+particlesMaterial.transparent = true;
+particlesMaterial.alphaMap = particleTexture; //We have a problem
+
+// Optimizing result
+particlesMaterial.depthWrite = false;
+particlesMaterial.blending = THREE.AdditiveBlending; // we can see the effect better with more particles
+// it does not draw one pixel over the other it would add more colors to see combined colors
+
+const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+scene.add(particles);
+
+// Donuts
+// const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 32, 64);
+
+// for (let i = 0; i < 100; i++) {
+//   const donut = new THREE.Mesh(donutGeometry, material);
+//   donut.position.x = (Math.random() - 0.5) * 10;
+//   donut.position.y = (Math.random() - 0.5) * 10;
+//   donut.position.z = (Math.random() - 0.5) * 10;
+//   donut.rotation.x = Math.random() * Math.PI;
+//   donut.rotation.y = Math.random() * Math.PI;
+//   const scale = Math.random();
+//   donut.scale.set(scale, scale, scale);
+
+//   scene.add(donut);
+// }
 
 /**
  * Sizes
@@ -123,6 +162,10 @@ const clock = new THREE.Clock();
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
+
+  // Animating Particles
+  particles.rotation.x = elapsedTime * 0.01;
+  particles.rotation.y = elapsedTime * 0.01;
 
   // Update controls
   controls.update();
