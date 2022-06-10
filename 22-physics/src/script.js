@@ -33,10 +33,26 @@ const debugObject = {
       z: (Math.random() - 0.5) * 3,
     });
   },
+
+  reset: () => {
+    console.log("reset func");
+    for (const object of objectsToUpdate) {
+      // Removing body
+      object.body.removeEventListener("collide", playHitSound);
+      world.remove(object.body);
+
+      // Removing Mesh
+      scene.remove(object.mesh);
+
+      //Remove Objects from Objects array
+      // objectsToUpdate.splice(0, objectsToUpdate.length);
+    }
+  },
 };
 
 gui.add(debugObject, "createSphere");
 gui.add(debugObject, "createBox");
+gui.add(debugObject, "reset");
 
 /**
  * Base
@@ -46,6 +62,22 @@ const canvas = document.querySelector("canvas.webgl");
 
 // Scene
 const scene = new THREE.Scene();
+
+/**
+ * Sound
+ */
+
+const hitSound = new Audio("/sounds/hit.mp3");
+const playHitSound = (collision) => {
+  // console.log(collision);
+  console.log(collision.contact.getImpactVelocityAlongNormal());
+  const impactStrength = collision.contact.getImpactVelocityAlongNormal();
+  if (impactStrength > 1.5) {
+    hitSound.volume = Math.random();
+    hitSound.currentTime = 0;
+    hitSound.play();
+  }
+};
 
 /**
  * Textures
@@ -68,6 +100,8 @@ const environmentMapTexture = cubeTextureLoader.load([
 
 // CREATING PHYSICS WORLD
 const world = new CANNON.World();
+world.broadphase = new CANNON.SAPBroadphase(world); // optimizing animations for performance
+world.allowSleep = true; // optimizing for sleeping objects to not be constantly checked when we animate +performance
 world.gravity.set(0, -9.82, 0); // negative gravity on the y axis
 
 // Materials  concrete & plastic
@@ -257,6 +291,7 @@ const createSphere = (radius, position) => {
     material: defaultMaterial,
   });
   body.position.copy(position);
+  body.addEventListener("collide", playHitSound); // Collision sound
   world.addBody(body);
 
   //Save in Objects to update
@@ -295,6 +330,7 @@ const createBox = (width, height, depth, position) => {
     material: defaultMaterial,
   });
   body.position.copy(position);
+  body.addEventListener("collide", playHitSound); // Collision sound
   world.addBody(body);
 
   //Save in Objects to update
@@ -322,6 +358,7 @@ const tick = () => {
   //   console.log(sphereBody.position.y);
   // sphere.position.copy(sphereBody.position);
 
+  // Naive Broad Phase by default but we changed to SAP Broadphase when we instanciate world.
   for (const object of objectsToUpdate) {
     object.mesh.position.copy(object.body.position);
     object.mesh.quaternion.copy(object.body.quaternion);
