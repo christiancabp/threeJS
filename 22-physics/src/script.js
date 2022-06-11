@@ -43,9 +43,6 @@ const debugObject = {
 
       // Removing Mesh
       scene.remove(object.mesh);
-
-      //Remove Objects from Objects array
-      // objectsToUpdate.splice(0, objectsToUpdate.length);
     }
   },
 };
