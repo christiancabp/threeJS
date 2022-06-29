@@ -1,18 +1,20 @@
-import "./style.css";
-import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import * as dat from "lil-gui";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
+import './style.css';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import * as dat from 'lil-gui';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 
 /**
  * Base
  */
 // Debug
-const gui = new dat.GUI();
+const gui = new dat.GUI({ width: 400 });
+
+const debugObject = {};
 
 // Canvas
-const canvas = document.querySelector("canvas.webgl");
+const canvas = document.querySelector('canvas.webgl');
 
 // Scene
 const scene = new THREE.Scene();
@@ -23,7 +25,7 @@ const scene = new THREE.Scene();
 
 // Draco Loader
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath("/draco/");
+dracoLoader.setDecoderPath('/draco/');
 
 let mixer = null;
 // Loading 3D models
@@ -31,7 +33,7 @@ const gltfLoader = new GLTFLoader(); // this loader can load binary and embbeded
 // adding Draco Loader
 gltfLoader.setDRACOLoader(dracoLoader); // optional algorith to load draco files and others only runs when loading Draco Files.
 gltfLoader.load(
-  "/models/Fox/glTF/Fox.gltf", // multiple meshes
+  '/models/mech_drone/scene.gltf', // multiple meshes
   (gltf) => {
     // Success callback func
     // console.log("success!");
@@ -54,18 +56,25 @@ gltfLoader.load(
 
     action.play();
 
+    // Casting shadows for each scene child element.
+    gltf.scene.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.castShadow = true;
+      }
+    });
+
     // Load by loading whole scene
-    gltf.scene.scale.set(0.025, 0.025, 0.025);
+    gltf.scene.scale.set(5, 5, 5);
 
     scene.add(gltf.scene);
   },
   () => {
     // Progress callback func
-    console.log("Progress!");
+    console.log('Progress!');
   },
   () => {
     // When error callback func
-    console.log("Error!");
+    console.log('Error!');
   }
 );
 
@@ -75,13 +84,14 @@ gltfLoader.load(
 const floor = new THREE.Mesh(
   new THREE.PlaneGeometry(10, 10),
   new THREE.MeshStandardMaterial({
-    color: "#444444",
+    color: '#1e1a20',
     metalness: 0,
     roughness: 0.5,
   })
 );
 floor.receiveShadow = true;
 floor.rotation.x = -Math.PI * 0.5;
+// floor.position.z = -10;
 scene.add(floor);
 
 /**
@@ -90,7 +100,7 @@ scene.add(floor);
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
 directionalLight.castShadow = true;
 directionalLight.shadow.mapSize.set(1024, 1024);
 directionalLight.shadow.camera.far = 15;
@@ -99,7 +109,20 @@ directionalLight.shadow.camera.top = 7;
 directionalLight.shadow.camera.right = 7;
 directionalLight.shadow.camera.bottom = -7;
 directionalLight.position.set(5, 5, 5);
+directionalLight.lookAt(0, 0, 0); //Always point to the center of the scene!
 scene.add(directionalLight);
+
+// We can render a light helper to see where the light is pointing.
+const lightHelper = new THREE.DirectionalLightHelper(directionalLight);
+scene.add(lightHelper);
+
+// gui control
+gui
+  .add(directionalLight, 'intensity')
+  .max(10)
+  .min(0.1)
+  .step(0.01)
+  .name('directional light intensity: ');
 
 /**
  * Sizes
@@ -109,7 +132,7 @@ const sizes = {
   height: window.innerHeight,
 };
 
-window.addEventListener("resize", () => {
+window.addEventListener('resize', () => {
   // Update sizes
   sizes.width = window.innerWidth;
   sizes.height = window.innerHeight;
@@ -167,6 +190,9 @@ const tick = () => {
   if (mixer) {
     mixer.update(deltaTime);
   }
+
+  directionalLight.position.x = Math.cos(elapsedTime * 0.5) * 4;
+  directionalLight.position.z = Math.sin(elapsedTime * 0.5) * 4;
 
   // Update controls
   controls.update();
