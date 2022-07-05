@@ -12,7 +12,6 @@ export default class Floor {
     this.setTextures();
     this.setMaterial();
     this.setMesh();
-
     // console.log('Floor class');
   }
   setGeometry() {

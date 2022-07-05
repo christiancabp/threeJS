@@ -88,7 +88,6 @@ export default class App {
       }
     });
 
-    // Destroying orbit controls
     this.camera.controls.dispose();
     this.renderer.instance.dispose();
     if (this.debug.active) {
